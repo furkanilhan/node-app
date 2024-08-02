@@ -1,0 +1,14 @@
+{
+  "name": "Furkan İlhan",
+  "age": 33,
+  "email": "furkan@furkan.com",
+  "hobbies": [
+    "football",
+    "tennis",
+    "game"
+  ],
+  "address": {
+    "city": "İstanbul",
+    "state": "Maltepe"
+  }
+}
