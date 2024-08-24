@@ -2,15 +2,15 @@ import * as https from 'https';
 import * as http from 'http';
 import * as fs from 'fs';
 import * as path from 'path';
-import { PORTS } from './constants.js';
+import { PORTS, SSL_OPTIONS } from './constants.js';
 import { handleRequest } from './routes.js';
 import { checkUploadDirectory, getCurrentDirectory } from './utils.js';
 
 const __dirname = getCurrentDirectory();
 
 const sslOptions = {
-  key: fs.readFileSync(path.join(__dirname, 'ssl', 'server.key')),
-  cert: fs.readFileSync(path.join(__dirname, 'ssl', 'server.crt'))
+  key: fs.readFileSync(SSL_OPTIONS.keyPath),
+  cert: fs.readFileSync(SSL_OPTIONS.certPath)
 };
 
 checkUploadDirectory(path.join(__dirname, 'uploads'));

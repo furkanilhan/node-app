@@ -2,3 +2,4 @@ dist/
 node_modules/
 src/ssl/
 package-lock.json
+.DS_Store

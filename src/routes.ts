@@ -1,43 +1,16 @@
 import * as http from 'http';
-import * as url from 'url';
-import { handleJsonUpload, handleImageUpload, handleListFiles, handleGetFile, handleDeleteFile } from './fileHandlers.js';
-import { parseRequestBody } from './utils.js';
-import { CONTENT_TYPE_JSON, HTTP_STATUS } from './constants.js';
+import { UploadController } from './controllers/UploadController.js';
+import { FileController } from './controllers/FileController.js';
 
-const handlePostRequest = (req: http.IncomingMessage, res: http.ServerResponse, pathname: string) => {
-  if (pathname === '/upload') {
-    parseRequestBody(req, (buffer, contentType) => {
-      if (contentType?.startsWith('application/json')) {
-        handleJsonUpload(buffer, res);
-      } else if (contentType?.startsWith('image/png') || contentType?.startsWith('image/jpeg')) {
-        handleImageUpload(req, contentType, res);
-      } else {
-        res.writeHead(HTTP_STATUS.BAD_REQUEST, CONTENT_TYPE_JSON);
-        res.end(JSON.stringify({ error: 'Unsupported Content-Type' }));
-      }
-    });
-  } else {
-    res.writeHead(HTTP_STATUS.NOT_FOUND, CONTENT_TYPE_JSON);
-    res.end(JSON.stringify({ error: 'Not Found' }));
-  }
-};
+const uploadController = new UploadController();
+const fileController = new FileController();
 
 export const handleRequest = (req: http.IncomingMessage, res: http.ServerResponse) => {
-  const parsedUrl = url.parse(req.url || '', true);
-  const pathname = parsedUrl.pathname || '';
+  const url = req.url || '';
 
-  if (req.method === 'POST') {
-    handlePostRequest(req, res, pathname);
-  } else if (req.method === 'GET') {
-    if (pathname === '/list') {
-      handleListFiles(res);
-    } else if (pathname.startsWith('/get')) {
-      handleGetFile(pathname, res);
-    }
-  } else if (req.method === 'DELETE' && pathname.startsWith('/delete')) {
-    handleDeleteFile(pathname, res);
+  if (url === '/upload') {
+    uploadController.handleRequest(req, res);
   } else {
-    res.writeHead(HTTP_STATUS.NOT_FOUND, CONTENT_TYPE_JSON);
-    res.end(JSON.stringify({ error: 'Not Found' }));
+    fileController.handleRequest(req, res);
   }
 };
