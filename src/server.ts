@@ -5,6 +5,7 @@ import * as path from 'path';
 import { PORTS, SSL_OPTIONS } from './constants.js';
 import { handleRequest } from './routes.js';
 import { checkUploadDirectory, getCurrentDirectory } from './utils.js';
+import { sessionMiddleware } from './middleware/sessionMiddleware.js';
 
 const __dirname = getCurrentDirectory();
 
@@ -15,6 +16,7 @@ const sslOptions = {
 
 checkUploadDirectory(path.join(__dirname, 'uploads'));
 
+// HTTP server create
 const httpServer = http.createServer((req, res) => {
   if (req.headers['x-forwarded-proto'] === 'https') {
     handleRequest(req, res);
@@ -24,9 +26,12 @@ const httpServer = http.createServer((req, res) => {
   }
 });
 
+// HTTPS server create
 const httpsServer = https.createServer(sslOptions, (req, res) => {
-  console.log(`HTTPS Request received: ${req.method} ${req.url}`);
-  handleRequest(req, res);
+  // Session validation on all requests
+  sessionMiddleware(req, res, () => { 
+    handleRequest(req, res);
+  });
 });
 
 httpServer.listen(PORTS.HTTP, () => {

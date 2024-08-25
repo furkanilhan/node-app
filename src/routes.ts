@@ -1,16 +1,19 @@
 import * as http from 'http';
-import { UploadController } from './controllers/UploadController.js';
-import { FileController } from './controllers/FileController.js';
-
-const uploadController = new UploadController();
-const fileController = new FileController();
+import { routeMap } from './constants.js'; 
 
 export const handleRequest = (req: http.IncomingMessage, res: http.ServerResponse) => {
   const url = req.url || '';
+  const method = req.method || '';
+  const routeKey = `${method} ${url}`;
 
-  if (url === '/upload') {
-    uploadController.handleRequest(req, res);
+  // Call the relevant controller function according to the route
+  const handler = routeMap.get(routeKey);
+
+  if (handler) {
+    // Call if there is a matching route
+    handler(req, res); 
   } else {
-    fileController.handleRequest(req, res);
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Not Found' }));
   }
 };

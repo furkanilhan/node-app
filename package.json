@@ -13,12 +13,18 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/mime": "^4.0.0",
     "@types/node": "^20.14.12",
+    "@types/pg": "^8.11.6",
+    "@types/uuid": "^10.0.0",
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "mime": "^4.0.4"
+    "bcrypt": "^5.1.1",
+    "mime": "^4.0.4",
+    "pg": "^8.12.0",
+    "uuid": "^10.0.0"
   },
   "type": "module"
 }
