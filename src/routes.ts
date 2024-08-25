@@ -1,18 +1,37 @@
 import * as http from 'http';
-import { routeMap } from './constants.js'; 
+import { AuthController } from './controllers/AuthController.js';
+import { FileController } from './controllers/FileController.js';
+
+// Controller instances
+const authController = new AuthController();
+const fileController = new FileController();
 
 export const handleRequest = (req: http.IncomingMessage, res: http.ServerResponse) => {
-  const url = req.url || '';
   const method = req.method || '';
-  const routeKey = `${method} ${url}`;
+  const parsedUrl = new URL(req.url || '', `http://${req.headers.host}`);
+  const pathname = parsedUrl.pathname;
 
-  // Call the relevant controller function according to the route
-  const handler = routeMap.get(routeKey);
-
-  if (handler) {
-    // Call if there is a matching route
-    handler(req, res); 
-  } else {
+  // Auth routes
+  if (method === 'POST' && pathname === '/register') {
+    authController.handleRequest(req, res);
+  } else if (method === 'POST' && pathname === '/login') {
+    authController.handleRequest(req, res);
+  }
+  // File routes
+  else if (method === 'POST' && pathname === '/upload') {
+    fileController.handleUpload(req, res);
+  }
+  else if (method === 'DELETE' && pathname.startsWith('/delete/')) {
+    const fileName = pathname.substring('/delete/'.length);
+    fileController.handleDelete(req, res, { fileName });
+  } else if (method === 'GET' && pathname === '/list') {
+    fileController.handleRequest(req, res);
+  } else if (method === 'GET' && pathname.startsWith('/get/')) {
+    const fileName = pathname.substring('/get/'.length);
+    fileController.handleGetFile(req, res, { fileName });
+  }
+  // Route not found
+  else {
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Not Found' }));
   }

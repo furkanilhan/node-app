@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { PORTS, SSL_OPTIONS } from './constants.js';
 import { handleRequest } from './routes.js';
-import { checkUploadDirectory, getCurrentDirectory } from './utils.js';
+import { checkUploadDirectory, getCurrentDirectory } from './utils/utils.js';
 import { sessionMiddleware } from './middleware/sessionMiddleware.js';
 
 const __dirname = getCurrentDirectory();

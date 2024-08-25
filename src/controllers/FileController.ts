@@ -1,24 +1,83 @@
 import * as http from 'http';
 import { BaseController } from './BaseController.js';
-import { handleListFiles, handleGetFile, handleDeleteFile } from './../fileHandlers.js';
-import { HTTP_STATUS, ROUTES } from './../constants.js';
+import { fileService } from './../services/FileService.js';
+import { parseRequestBody } from '../utils/utils.js';
+import {
+  deleteFile,
+  streamFile,
+  uploadJson,
+  uploadImage,
+  sendResponse,
+} from './../utils/fileUtils.js'; 
+import { HTTP_STATUS } from './../constants.js';
 
 export class FileController extends BaseController {
-  handleRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
-    const url = req.url || '';
+  async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    const userId = req.session?.userId;
 
-    if (req.session && req.session.userId) {
-      if (url === ROUTES.LIST && req.method === 'GET') {
-        handleListFiles(res);
-      } else if (url.startsWith(ROUTES.GET) && req.method === 'GET') {
-        handleGetFile(url, res);
-      } else if (url.startsWith(ROUTES.DELETE) && req.method === 'DELETE') {
-        handleDeleteFile(url, res);
-      } else {
-        this.handleNotFound(res);
+    if (!this.isUserAuthenticated(req, res, userId)) {
+      return;
+    }
+
+    const files = await fileService.getUserFiles(userId!);
+    sendResponse(res, HTTP_STATUS.OK, files);
+  }
+
+  async handleDelete(req: http.IncomingMessage, res: http.ServerResponse, params: { fileName: string }) {
+    const userId = req.session?.userId;
+
+    if (!this.isUserAuthenticated(req, res, userId)) {
+      return;
+    }
+
+    const fileName = params.fileName;
+    await deleteFile(fileName, res, userId!);
+  }
+
+  async handleGetFile(req: http.IncomingMessage, res: http.ServerResponse, params: { fileName: string }) {
+    const userId = req.session?.userId;
+
+    if (!this.isUserAuthenticated(req, res, userId)) {
+      return;
+    }
+
+    const fileName = params.fileName;
+    await streamFile(fileName, res, userId!);
+  }
+
+  async handleUpload(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    const userId = req.session?.userId;
+
+    if (!this.isUserAuthenticated(req, res, userId)) {
+      return;
+    }
+
+    parseRequestBody(req, async (buffer, contentType) => {
+      try {
+        if (contentType?.startsWith('application/json')) {
+          await uploadJson(buffer, res, userId!);
+        } else if (contentType?.startsWith('image/png') || contentType?.startsWith('image/jpeg')) {
+          await uploadImage(buffer, contentType, res, userId!);
+        } else {
+          sendResponse(res, HTTP_STATUS.BAD_REQUEST, { error: 'Unsupported Content-Type' });
+        }
+      } catch (error) {
+        this.handleInternalError(res, 'Upload failed');
       }
-    } else {
-      this.sendResponse(res, HTTP_STATUS.UNAUTHORIZED, { error: 'Unauthorized access' });
+    });
+  }
+
+  private isUserAuthenticated(req: http.IncomingMessage, res: http.ServerResponse, userId: number | undefined): userId is number {
+    if (!userId) {
+      sendResponse(res, HTTP_STATUS.UNAUTHORIZED, { error: 'Unauthorized access' });
+      return false;
+    }
+    return true;
+  }
+
+  private handleInternalError(res: http.ServerResponse, message: string) {
+    if (!res.headersSent) {
+      sendResponse(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, { error: message });
     }
   }
 }

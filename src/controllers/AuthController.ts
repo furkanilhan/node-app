@@ -2,7 +2,7 @@ import * as http from 'http';
 import * as bcrypt from 'bcrypt';
 import { BaseController } from './BaseController.js';
 import { userService } from '../services/UserService.js';
-import { parseRequestBody } from './../utils.js';
+import { parseRequestBody } from '../utils/utils.js';
 import { HTTP_STATUS } from './../constants.js';
 
 export class AuthController extends BaseController {
@@ -54,11 +54,11 @@ export class AuthController extends BaseController {
         }
 
         if (req.session) {
-            req.session.userId = user.id;
-            this.sendResponse(res, HTTP_STATUS.OK, { message: 'Logged in successfully' });
-          } else {
-            this.sendResponse(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, { error: 'Session not initialized' });
-          }
+          req.session.userId = user.id;
+          this.sendResponse(res, HTTP_STATUS.OK, { message: 'Logged in successfully' });
+        } else {
+          this.sendResponse(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, { error: 'Session not initialized' });
+        }
       });
     } catch (error) {
       this.sendResponse(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, { error: 'Internal Server Error' });
