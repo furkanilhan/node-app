@@ -5,7 +5,10 @@ export class UserService {
   async createUser(username: string, password: string): Promise<void> {
     const client = await pool.connect();
     try {
-      await client.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, password]);
+      await client.query(
+        'INSERT INTO users (username, password) VALUES ($1, $2)',
+        [username, password]
+      );
     } finally {
       client.release();
     }
@@ -14,13 +17,15 @@ export class UserService {
   async findByUsername(username: string): Promise<User | null> {
     const client = await pool.connect();
     try {
-      const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
+      const result = await client.query(
+        'SELECT * FROM users WHERE username = $1',
+        [username]
+      );
       return result.rows[0] || null;
     } finally {
       client.release();
     }
   }
-
 }
 
 export const userService = new UserService();

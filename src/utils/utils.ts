@@ -38,9 +38,12 @@ export const handleError = (error: unknown, res: http.ServerResponse) => {
 /**
  * Parses the request body and passes the buffer to the callback function.
  */
-export const parseRequestBody = (req: http.IncomingMessage, callback: (body: Buffer, contentType: string | undefined) => void) => {
+export const parseRequestBody = (
+  req: http.IncomingMessage,
+  callback: (body: Buffer, contentType: string | undefined) => void
+) => {
   let body: Buffer[] = [];
-  req.on('data', chunk => body.push(chunk));
+  req.on('data', (chunk) => body.push(chunk));
   req.on('end', () => {
     const buffer = Buffer.concat(body);
     callback(buffer, req.headers['content-type']);

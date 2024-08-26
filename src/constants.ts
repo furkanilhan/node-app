@@ -11,12 +11,12 @@ export const SESSION_TIMEOUT = 60 * 60 * 1000; // 1 hour
 
 export const PORTS = {
   HTTP: 80,
-  HTTPS: 443
+  HTTPS: 443,
 };
 
 export const SSL_OPTIONS = {
   keyPath: path.join(__dirname, 'ssl', 'server.key'),
-  certPath: path.join(__dirname, 'ssl', 'server.crt')
+  certPath: path.join(__dirname, 'ssl', 'server.crt'),
 };
 
 export const CONTENT_TYPE_JSON = { 'Content-Type': 'application/json' };
@@ -33,7 +33,7 @@ export const ROUTES = {
   UPLOAD: '/upload',
   LIST: '/list',
   GET: '/get',
-  DELETE: '/delete'
+  DELETE: '/delete',
 };
 
 // Controller instances
@@ -41,11 +41,16 @@ const authController = new AuthController();
 const fileController = new FileController();
 
 // Route handlers mapping
-export const ROUTE_HANDLERS: Record<string, (req: http.IncomingMessage, res: http.ServerResponse, params?: any) => void> = {
+export const ROUTE_HANDLERS: Record<
+  string,
+  (req: http.IncomingMessage, res: http.ServerResponse, params?: any) => void
+> = {
   'POST:/register': (req, res) => authController.handleRequest(req, res),
   'POST:/login': (req, res) => authController.handleRequest(req, res),
   'POST:/upload': (req, res) => fileController.handleUpload(req, res),
-  'DELETE:/delete': (req, res, params) => fileController.handleDelete(req, res, params),
+  'DELETE:/delete': (req, res, params) =>
+    fileController.handleDelete(req, res, params),
   'GET:/list': (req, res) => fileController.handleRequest(req, res),
-  'GET:/get': (req, res, params) => fileController.handleGetFile(req, res, params),
+  'GET:/get': (req, res, params) =>
+    fileController.handleGetFile(req, res, params),
 };

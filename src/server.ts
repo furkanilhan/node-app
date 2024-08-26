@@ -11,7 +11,7 @@ const __dirname = getCurrentDirectory();
 
 const sslOptions = {
   key: fs.readFileSync(SSL_OPTIONS.keyPath),
-  cert: fs.readFileSync(SSL_OPTIONS.certPath)
+  cert: fs.readFileSync(SSL_OPTIONS.certPath),
 };
 
 checkUploadDirectory(path.join(__dirname, 'uploads'));
@@ -29,7 +29,7 @@ const httpServer = http.createServer((req, res) => {
 // HTTPS server create
 const httpsServer = https.createServer(sslOptions, (req, res) => {
   // Session validation on all requests
-  sessionMiddleware(req, res, () => { 
+  sessionMiddleware(req, res, () => {
     handleRequest(req, res);
   });
 });

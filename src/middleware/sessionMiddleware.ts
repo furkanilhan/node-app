@@ -12,7 +12,7 @@ function getSession(req: http.IncomingMessage, res: http.ServerResponse) {
 
   if (cookie) {
     const cookies = cookie.split(';').reduce((acc: any, cookie) => {
-      const [key, value] = cookie.split('=').map(c => c.trim());
+      const [key, value] = cookie.split('=').map((c) => c.trim());
       acc[key] = value;
       return acc;
     }, {});
@@ -30,13 +30,19 @@ function getSession(req: http.IncomingMessage, res: http.ServerResponse) {
 }
 
 // Middleware that controls sessions
-export const sessionMiddleware = (req: http.IncomingMessage, res: http.ServerResponse, next: Function) => {
+export const sessionMiddleware = (
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  next: Function
+) => {
   const sessionData = getSession(req, res);
   req.session = sessionData;
   const isProtectedRoute = Object.values(ROUTES).includes(req.url || '');
 
   if (isProtectedRoute && !sessionData.userId) {
-    res.writeHead(HTTP_STATUS.UNAUTHORIZED, { 'Content-Type': 'application/json' });
+    res.writeHead(HTTP_STATUS.UNAUTHORIZED, {
+      'Content-Type': 'application/json',
+    });
     res.end(JSON.stringify({ error: 'Unauthorized access' }));
   } else {
     next(); // If the session exists or is not a protected route, continue to the next operation

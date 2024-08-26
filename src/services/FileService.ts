@@ -2,7 +2,8 @@ import pool from '../db.js';
 
 export const fileService = {
   async saveFileRecord(filename: string, filepath: string, userId: number) {
-    const query = 'INSERT INTO files (filename, filepath, user_id) VALUES ($1, $2, $3)';
+    const query =
+      'INSERT INTO files (filename, filepath, user_id) VALUES ($1, $2, $3)';
     await pool.query(query, [filename, filepath, userId]);
   },
 
@@ -27,5 +28,5 @@ export const fileService = {
   async deleteFileRecord(fileId: number) {
     const query = 'DELETE FROM files WHERE id = $1';
     await pool.query(query, [fileId]);
-  }
+  },
 };

@@ -13,7 +13,11 @@ const UPLOAD_DIR = path.join(__dirname, 'uploads');
  * Validates and retrieves a file record by filename and userId.
  * If the file does not exist, it sends a 404 response.
  */
-export const validateAndGetFile = async (fileName: string, userId: number, res: http.ServerResponse) => {
+export const validateAndGetFile = async (
+  fileName: string,
+  userId: number,
+  res: http.ServerResponse
+) => {
   const file = await fileService.getFileByName(fileName, userId);
   if (!file) {
     sendResponse(res, HTTP_STATUS.NOT_FOUND, { error: 'File not found' });
@@ -26,7 +30,11 @@ export const validateAndGetFile = async (fileName: string, userId: number, res: 
  * Streams a file to the client.
  * Validates the file existence and streams it using fs.createReadStream.
  */
-export const streamFile = async (fileName: string, res: http.ServerResponse, userId: number) => {
+export const streamFile = async (
+  fileName: string,
+  res: http.ServerResponse,
+  userId: number
+) => {
   const file = await validateAndGetFile(fileName, userId, res);
   if (!file) return;
 
@@ -40,17 +48,23 @@ export const streamFile = async (fileName: string, res: http.ServerResponse, use
 /**
  * Deletes a file both from the server and the database.
  */
-export const deleteFile = async (fileName: string, res: http.ServerResponse, userId: number) => {
+export const deleteFile = async (
+  fileName: string,
+  res: http.ServerResponse,
+  userId: number
+) => {
   const file = await validateAndGetFile(fileName, userId, res);
   if (!file) return;
 
-  try{
+  try {
     const filePath = path.join(UPLOAD_DIR, file.filename);
     await fs.promises.unlink(filePath);
     await fileService.deleteFileRecord(file.id);
     sendResponse(res, HTTP_STATUS.OK, { message: 'File deleted successfully' });
-  } catch(error) {
-    sendResponse(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, { error: 'Internal server error' });
+  } catch (error) {
+    sendResponse(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, {
+      error: 'Internal server error',
+    });
     return undefined;
   }
 };
@@ -59,7 +73,11 @@ export const deleteFile = async (fileName: string, res: http.ServerResponse, use
  * Uploads a JSON file.
  * Parses the buffer to JSON, saves it to the file system and records it in the database.
  */
-export const uploadJson = async (buffer: Buffer, res: http.ServerResponse, userId: number) => {
+export const uploadJson = async (
+  buffer: Buffer,
+  res: http.ServerResponse,
+  userId: number
+) => {
   try {
     const json = JSON.parse(buffer.toString());
     const fileName = `upload_${Date.now()}.json`;
@@ -68,16 +86,16 @@ export const uploadJson = async (buffer: Buffer, res: http.ServerResponse, userI
     await fs.promises.writeFile(filePath, JSON.stringify(json, null, 2));
     await fileService.saveFileRecord(fileName, `uploads/${fileName}`, userId);
 
-    const keyTypes = Object.keys(json).map(key => ({
+    const keyTypes = Object.keys(json).map((key) => ({
       key,
-      type: getValueType(json[key])
+      type: getValueType(json[key]),
     }));
 
     sendResponse(res, HTTP_STATUS.OK, {
       fileName,
       type: 'json',
       keys: keyTypes,
-      contentType: 'application/json'
+      contentType: 'application/json',
     });
 
     return fileName;
@@ -91,7 +109,12 @@ export const uploadJson = async (buffer: Buffer, res: http.ServerResponse, userI
  * Uploads an image file.
  * Writes the buffer to the file system and records it in the database.
  */
-export const uploadImage = (buffer: Buffer, contentType:string, res: http.ServerResponse, userId: number): Promise<string | undefined> => {
+export const uploadImage = (
+  buffer: Buffer,
+  contentType: string,
+  res: http.ServerResponse,
+  userId: number
+): Promise<string | undefined> => {
   return new Promise((resolve, reject) => {
     const fileName = `upload_${Date.now()}.${mime.getExtension(contentType)}`;
     const filePath = path.join(UPLOAD_DIR, fileName);
@@ -106,13 +129,13 @@ export const uploadImage = (buffer: Buffer, contentType:string, res: http.Server
       sendResponse(res, HTTP_STATUS.OK, {
         fileName,
         type: mime.getExtension(contentType),
-        contentType
+        contentType,
       });
 
       resolve(fileName);
     });
 
-    fileStream.on('error', error => {
+    fileStream.on('error', (error) => {
       handleError(error, res);
       reject(undefined);
     });
@@ -122,7 +145,11 @@ export const uploadImage = (buffer: Buffer, contentType:string, res: http.Server
 /**
  * Sends a JSON response to the client with the specified status code and data.
  */
-export const sendResponse = (res: http.ServerResponse, statusCode: number, data: any): void => {
+export const sendResponse = (
+  res: http.ServerResponse,
+  statusCode: number,
+  data: any
+): void => {
   res.writeHead(statusCode, CONTENT_TYPE_JSON);
   res.end(JSON.stringify(data));
 };
@@ -134,6 +161,6 @@ const getValueType = (value: any): string => {
   return Array.isArray(value)
     ? `array <${Math.min(value.length, 10)} items>`
     : typeof value === 'object' && value !== null
-    ? `object <${Object.keys(value).length} key-value pairs>`
-    : typeof value;
+      ? `object <${Object.keys(value).length} key-value pairs>`
+      : typeof value;
 };

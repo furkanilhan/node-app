@@ -1,8 +1,10 @@
 import * as http from 'http';
 import { ROUTE_HANDLERS, CONTENT_TYPE_JSON } from './constants.js';
 
-
-export const handleRequest = (req: http.IncomingMessage, res: http.ServerResponse) => {
+export const handleRequest = (
+  req: http.IncomingMessage,
+  res: http.ServerResponse
+) => {
   const method = req.method || '';
   const parsedUrl = new URL(req.url || '', `http://${req.headers.host}`);
   const pathname = parsedUrl.pathname;
