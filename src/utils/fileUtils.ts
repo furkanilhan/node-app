@@ -44,11 +44,15 @@ export const deleteFile = async (fileName: string, res: http.ServerResponse, use
   const file = await validateAndGetFile(fileName, userId, res);
   if (!file) return;
 
-  const filePath = path.join(UPLOAD_DIR, file.filename);
-  await fs.promises.unlink(filePath);
-  await fileService.deleteFileRecord(file.id);
-
-  sendResponse(res, HTTP_STATUS.OK, { message: 'File deleted successfully' });
+  try{
+    const filePath = path.join(UPLOAD_DIR, file.filename);
+    await fs.promises.unlink(filePath);
+    await fileService.deleteFileRecord(file.id);
+    sendResponse(res, HTTP_STATUS.OK, { message: 'File deleted successfully' });
+  } catch(error) {
+    sendResponse(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, { error: 'Internal server error' });
+    return undefined;
+  }
 };
 
 /**

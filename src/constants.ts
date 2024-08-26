@@ -1,5 +1,8 @@
 import * as path from 'path';
+import * as http from 'http';
 import { getCurrentDirectory } from './utils/utils.js';
+import { AuthController } from './controllers/AuthController.js';
+import { FileController } from './controllers/FileController.js';
 
 const __dirname = getCurrentDirectory();
 
@@ -31,4 +34,18 @@ export const ROUTES = {
   LIST: '/list',
   GET: '/get',
   DELETE: '/delete'
+};
+
+// Controller instances
+const authController = new AuthController();
+const fileController = new FileController();
+
+// Route handlers mapping
+export const ROUTE_HANDLERS: Record<string, (req: http.IncomingMessage, res: http.ServerResponse, params?: any) => void> = {
+  'POST:/register': (req, res) => authController.handleRequest(req, res),
+  'POST:/login': (req, res) => authController.handleRequest(req, res),
+  'POST:/upload': (req, res) => fileController.handleUpload(req, res),
+  'DELETE:/delete': (req, res, params) => fileController.handleDelete(req, res, params),
+  'GET:/list': (req, res) => fileController.handleRequest(req, res),
+  'GET:/get': (req, res, params) => fileController.handleGetFile(req, res, params),
 };
